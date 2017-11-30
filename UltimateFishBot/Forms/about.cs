@@ -133,7 +133,7 @@ namespace UltimateFishBot.Forms
 
         private void logoPictureBox_DoubleClick(object sender, EventArgs e)
         {
-            T2S say = new T2S();
+            TextToSpeech say = new TextToSpeech();
             say.Say("Please STOP!");
         }
 

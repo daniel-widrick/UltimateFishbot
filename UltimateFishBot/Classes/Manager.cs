@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using UltimateFishBot.Classes.BodyParts;
 
 namespace UltimateFishBot.Classes
@@ -36,71 +35,70 @@ namespace UltimateFishBot.Classes
         }
 
         private CancellationTokenSource _cancellationTokenSource;
-        private System.Windows.Forms.Timer m_LureTimer;
-        private System.Windows.Forms.Timer m_HearthStoneTimer;
-        private System.Windows.Forms.Timer m_RaftTimer;
-        private System.Windows.Forms.Timer m_CharmTimer;
-        private System.Windows.Forms.Timer m_BaitTimer;
-        private System.Windows.Forms.Timer m_AntiAfkTimer;
+        private readonly System.Windows.Forms.Timer _mLureTimer;
+        private readonly System.Windows.Forms.Timer _mHearthStoneTimer;
+        private readonly System.Windows.Forms.Timer _mRaftTimer;
+        private readonly System.Windows.Forms.Timer _mCharmTimer;
+        private readonly System.Windows.Forms.Timer _mBaitTimer;
+        private readonly System.Windows.Forms.Timer _mAntiAfkTimer;
 
-        private IManagerEventHandler m_managerEventHandler;
+        private readonly IManagerEventHandler _mManagerEventHandler;
 
-        private Eyes m_eyes;
-        private Hands m_hands;
-        private Ears m_ears;
-        private Mouth m_mouth;
-        private Legs m_legs;
-        private T2S t2s;
+        private readonly Eyes _mEyes;
+        private readonly Hands _mHands;
+        private readonly Ears _mEars;
+        private readonly Mouth _mMouth;
+        private readonly Legs _mLegs;
+        private TextToSpeech _textToSpeech;
 
-        private NeededAction m_neededActions;
-        private FishingState m_fishingState;
-        private FishingStats m_fishingStats;
+        private NeededAction _mNeededActions;
+        private FishingState _mFishingState;
+        private readonly FishingStats _mFishingStats;
 
-        private const int SECOND = 1000;
-        private const int MINUTE = 60 * SECOND;
+        private const int Second = 1000;
+        private const int Minute = 60 * Second;
 
         public Manager(IManagerEventHandler managerEventHandler, IProgress<string> progressHandle)
         {
-            m_managerEventHandler    = managerEventHandler;
+            _mManagerEventHandler    = managerEventHandler;
 
-            m_eyes                   = new Eyes();
-            m_hands                  = new Hands();
-            m_ears                   = new Ears();
-            m_mouth                  = new Mouth(progressHandle);
-            m_legs                   = new Legs();
+            _mEyes                   = new Eyes();
+            _mHands                  = new Hands();
+            _mEars                   = new Ears();
+            _mMouth                  = new Mouth(progressHandle);
+            _mLegs                   = new Legs();
 
-            m_fishingState           = FishingState.Stopped;
-            m_neededActions          = NeededAction.None;
+            _mFishingState           = FishingState.Stopped;
+            _mNeededActions          = NeededAction.None;
 
-            m_fishingStats           = new FishingStats();
-            m_fishingStats.Reset();
+            _mFishingStats           = new FishingStats();
+            _mFishingStats.Reset();
 
             _cancellationTokenSource = null;
 
-            InitializeTimer(ref m_LureTimer, LureTimerTick);
-            InitializeTimer(ref m_CharmTimer, CharmTimerTick);
-            InitializeTimer(ref m_RaftTimer, RaftTimerTick);
-            InitializeTimer(ref m_BaitTimer, BaitTimerTick);
-            InitializeTimer(ref m_HearthStoneTimer, HearthStoneTimerTick);
-            InitializeTimer(ref m_AntiAfkTimer, AntiAfkTimerTick);
+            InitializeTimer(out _mLureTimer, LureTimerTick);
+            InitializeTimer(out _mCharmTimer, CharmTimerTick);
+            InitializeTimer(out _mRaftTimer, RaftTimerTick);
+            InitializeTimer(out _mBaitTimer, BaitTimerTick);
+            InitializeTimer(out _mHearthStoneTimer, HearthStoneTimerTick);
+            InitializeTimer(out _mAntiAfkTimer, AntiAfkTimerTick);
 
             ResetTimers();
         }
 
-        private void InitializeTimer(ref System.Windows.Forms.Timer timer, EventHandler handler)
+        private void InitializeTimer(out System.Windows.Forms.Timer timer, EventHandler handler)
         {
-            timer = new System.Windows.Forms.Timer();
-            timer.Enabled = false;
-            timer.Tick += new EventHandler(handler);
+            timer = new System.Windows.Forms.Timer {Enabled = false};
+            timer.Tick += handler;
         }
 
         public async Task StartOrResumeOrPause()
         {
-            if (m_fishingState == Manager.FishingState.Stopped)
+            if (_mFishingState == FishingState.Stopped)
             {
                 await RunBotUntilCanceled();
             }
-            else if (m_fishingState == Manager.FishingState.Paused)
+            else if (_mFishingState == FishingState.Paused)
             {
                 await Resume();
             }
@@ -114,21 +112,21 @@ namespace UltimateFishBot.Classes
         {
             ResetTimers();
             EnableTimers();
-            m_mouth.Say(Translate.GetTranslate("frmMain", "LABEL_STARTED"));
-            m_managerEventHandler.Started();
+            _mMouth.Say(Translate.GetTranslate("frmMain", "LABEL_STARTED"));
+            _mManagerEventHandler.Started();
             await RunBot();
         }
 
         private async Task Resume()
         {
-            m_mouth.Say(Translate.GetTranslate("frmMain", "LABEL_RESUMED"));
-            m_managerEventHandler.Resumed();
+            _mMouth.Say(Translate.GetTranslate("frmMain", "LABEL_RESUMED"));
+            _mManagerEventHandler.Resumed();
             await RunBot();
         }
 
         private async Task RunBot()
         {
-            m_fishingState = FishingState.Fishing;
+            _mFishingState = FishingState.Fishing;
             _cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = _cancellationTokenSource.Token;
             try
@@ -173,9 +171,9 @@ namespace UltimateFishBot.Classes
         private void Pause()
         {
             CancelRun();
-            m_fishingState = FishingState.Paused;
-            m_mouth.Say(Translate.GetTranslate("frmMain", "LABEL_PAUSED"));
-            m_managerEventHandler.Paused();
+            _mFishingState = FishingState.Paused;
+            _mMouth.Say(Translate.GetTranslate("frmMain", "LABEL_PAUSED"));
+            _mManagerEventHandler.Paused();
         }
 
         public void EnableTimers()
@@ -183,60 +181,60 @@ namespace UltimateFishBot.Classes
             if (Properties.Settings.Default.AutoLure)
             {
                 AddNeededAction(NeededAction.Lure);
-                m_LureTimer.Enabled = true;
+                _mLureTimer.Enabled = true;
             }
 
             if (Properties.Settings.Default.AutoCharm)
             {
                 AddNeededAction(NeededAction.Charm);
-                m_CharmTimer.Enabled = true;
+                _mCharmTimer.Enabled = true;
             }
 
             if (Properties.Settings.Default.AutoRaft)
             {
                 AddNeededAction(NeededAction.Raft);
-                m_RaftTimer.Enabled = true;
+                _mRaftTimer.Enabled = true;
             }
 
             if (Properties.Settings.Default.AutoBait)
             {
                 AddNeededAction(NeededAction.Bait);
-                m_BaitTimer.Enabled = true;
+                _mBaitTimer.Enabled = true;
             }
 
             if (Properties.Settings.Default.AutoHearth)
-                m_HearthStoneTimer.Enabled = true;
+                _mHearthStoneTimer.Enabled = true;
 
             if (Properties.Settings.Default.AntiAfk)
-                m_AntiAfkTimer.Enabled = true;
+                _mAntiAfkTimer.Enabled = true;
         }
 
         public void Stop()
         {
             CancelRun();
-            m_fishingState = FishingState.Stopped;
-            m_mouth.Say(Translate.GetTranslate("frmMain", "LABEL_STOPPED"));
-            m_managerEventHandler.Stopped();
-            m_LureTimer.Enabled        = false;
-            m_RaftTimer.Enabled        = false;
-            m_CharmTimer.Enabled       = false;
-            m_BaitTimer.Enabled        = false;
-            m_HearthStoneTimer.Enabled = false;
+            _mFishingState = FishingState.Stopped;
+            _mMouth.Say(Translate.GetTranslate("frmMain", "LABEL_STOPPED"));
+            _mManagerEventHandler.Stopped();
+            _mLureTimer.Enabled        = false;
+            _mRaftTimer.Enabled        = false;
+            _mCharmTimer.Enabled       = false;
+            _mBaitTimer.Enabled        = false;
+            _mHearthStoneTimer.Enabled = false;
         }
 
         private bool IsStoppedOrPaused()
         {
-            return m_fishingState == FishingState.Stopped || m_fishingState == FishingState.Paused;
+            return _mFishingState == FishingState.Stopped || _mFishingState == FishingState.Paused;
         }
 
         public FishingStats GetFishingStats()
         {
-            return m_fishingStats;
+            return _mFishingStats;
         }
 
         public void ResetFishingStats()
         {
-            m_fishingStats.Reset();
+            _mFishingStats.Reset();
         }
         
         public async Task StartOrStop()
@@ -249,24 +247,24 @@ namespace UltimateFishBot.Classes
 
         private void ResetTimers()
         {
-            m_LureTimer.Interval        = Properties.Settings.Default.LureTime * MINUTE + 22 * SECOND;
-            m_RaftTimer.Interval        = Properties.Settings.Default.RaftTime * MINUTE;
-            m_CharmTimer.Interval       = Properties.Settings.Default.CharmTime * MINUTE;
-            m_BaitTimer.Interval        = Properties.Settings.Default.BaitTime * MINUTE;
-            m_HearthStoneTimer.Interval = Properties.Settings.Default.HearthTime * MINUTE;
-            m_AntiAfkTimer.Interval     = Properties.Settings.Default.AntiAfkTime * MINUTE;
+            _mLureTimer.Interval        = Properties.Settings.Default.LureTime * Minute + 22 * Second;
+            _mRaftTimer.Interval        = Properties.Settings.Default.RaftTime * Minute;
+            _mCharmTimer.Interval       = Properties.Settings.Default.CharmTime * Minute;
+            _mBaitTimer.Interval        = Properties.Settings.Default.BaitTime * Minute;
+            _mHearthStoneTimer.Interval = Properties.Settings.Default.HearthTime * Minute;
+            _mAntiAfkTimer.Interval     = Properties.Settings.Default.AntiAfkTime * Minute;
         }
 
         private async Task Fish(CancellationToken cancellationToken)
         {
-            m_mouth.Say(Translate.GetTranslate("manager", "LABEL_CASTING"));
-            await m_hands.Cast(cancellationToken);
+            _mMouth.Say(Translate.GetTranslate("manager", "LABEL_CASTING"));
+            await _mHands.Cast(cancellationToken);
 
-            m_mouth.Say(Translate.GetTranslate("manager", "LABEL_FINDING"));
-            bool didFindFish = await m_eyes.LookForBobber(cancellationToken);
+            _mMouth.Say(Translate.GetTranslate("manager", "LABEL_FINDING"));
+            bool didFindFish = await _mEyes.LookForBobber(cancellationToken);
             if (!didFindFish)
             {
-                m_fishingStats.RecordBobberNotFound();
+                _mFishingStats.RecordBobberNotFound();
                 return;
             }
 
@@ -278,18 +276,18 @@ namespace UltimateFishBot.Classes
             {
                 if (!uiUpdateCancelToken.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
                 {
-                    m_mouth.Say(Translate.GetTranslate(
+                    _mMouth.Say(Translate.GetTranslate(
                         "manager",
                         "LABEL_WAITING",
-                        msecs / SECOND,
-                        Properties.Settings.Default.FishWait / SECOND));
+                        msecs / Second,
+                        Properties.Settings.Default.FishWait / Second));
                 }
             });
             var uiUpdateTask = Task.Run(
-                async () => await UpdateUIWhileWaitingToHearFish(progress, uiUpdateCancelToken),
+                async () => await UpdateUiWhileWaitingToHearFish(progress, uiUpdateCancelToken),
                 uiUpdateCancelToken);
 
-            bool fishHeard = await m_ears.Listen(
+            bool fishHeard = await _mEars.Listen(
                 Properties.Settings.Default.FishWait,
                 cancellationToken);
             uiUpdateCancelTokenSource.Cancel();
@@ -308,16 +306,16 @@ namespace UltimateFishBot.Classes
 
             if (!fishHeard)
             {
-                m_fishingStats.RecordNotHeard();
+                _mFishingStats.RecordNotHeard();
                 return;
             }
 
-            m_mouth.Say(Translate.GetTranslate("manager", "LABEL_HEAR_FISH"));
-            await m_hands.Loot();
-            m_fishingStats.RecordSuccess();
+            _mMouth.Say(Translate.GetTranslate("manager", "LABEL_HEAR_FISH"));
+            await _mHands.Loot();
+            _mFishingStats.RecordSuccess();
         }
 
-        private async Task UpdateUIWhileWaitingToHearFish(
+        private async Task UpdateUiWhileWaitingToHearFish(
             IProgress<long> progress, 
             CancellationToken uiUpdateCancelToken)
         {
@@ -327,7 +325,7 @@ namespace UltimateFishBot.Classes
             while (!uiUpdateCancelToken.IsCancellationRequested)
             {
                 progress.Report(stopwatch.ElapsedMilliseconds);
-                await Task.Delay(SECOND / 10, uiUpdateCancelToken);
+                await Task.Delay(Second / 10, uiUpdateCancelToken);
             }
             uiUpdateCancelToken.ThrowIfCancellationRequested();
         }
@@ -343,10 +341,10 @@ namespace UltimateFishBot.Classes
                 case NeededAction.Charm:
                 case NeededAction.Raft:
                 case NeededAction.Bait:
-                    await m_hands.DoAction(action, m_mouth, cancellationToken);
+                    await _mHands.DoAction(action, _mMouth, cancellationToken);
                     break;
                 case NeededAction.AntiAfkMove:
-                    await m_legs.DoMovement(t2s, cancellationToken);
+                    await _mLegs.DoMovement(_textToSpeech, cancellationToken);
                     break;
             }
 
@@ -385,17 +383,17 @@ namespace UltimateFishBot.Classes
 
         private void AddNeededAction(NeededAction action)
         {
-            m_neededActions |= action;
+            _mNeededActions |= action;
         }
 
         private void RemoveNeededAction(NeededAction action)
         {
-            m_neededActions &= ~action;
+            _mNeededActions &= ~action;
         }
 
         private bool HasNeededAction(NeededAction action)
         {
-            return (m_neededActions & action) != NeededAction.None;
+            return (_mNeededActions & action) != NeededAction.None;
         }
     }
 }

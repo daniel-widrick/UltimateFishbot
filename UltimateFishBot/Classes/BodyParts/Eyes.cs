@@ -1,47 +1,48 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using UltimateFishBot.Classes.Helpers;
+using UltimateFishBot.Properties;
 
 namespace UltimateFishBot.Classes.BodyParts
 {
-    class NoFishFoundException : Exception { }
-    class Eyes
+    public class NoFishFoundException : Exception { }
+
+    public class Eyes
     {
-        int xPosMin;
-        int xPosMax;
-        int yPosMin;
-        int yPosMax;
-        Rectangle wowRectangle;
-        private Win32.CursorInfo m_noFishCursor;
+        int _xPosMin;
+        int _xPosMax;
+        int _yPosMin;
+        int _yPosMax;
+        Rectangle _wowRectangle;
+        private Win32.CursorInfo _mNoFishCursor;
 
         public async Task<bool> LookForBobber(CancellationToken cancellationToken)
         {
-            m_noFishCursor = Win32.GetNoFishCursor();
-            wowRectangle = Win32.GetWowRectangle();
+            _mNoFishCursor = Win32.GetNoFishCursor();
+            _wowRectangle = Win32.GetWowRectangle();
 
-            if (!Properties.Settings.Default.customScanArea)
+            if (!Settings.Default.customScanArea)
             {
-                xPosMin = wowRectangle.Width / 4;
-                xPosMax = xPosMin * 3;
-                yPosMin = wowRectangle.Height / 4;
-                yPosMax = yPosMin * 3;
-                System.Console.Out.WriteLine("Using default area");
+                _xPosMin = _wowRectangle.Width / 4;
+                _xPosMax = _xPosMin * 3;
+                _yPosMin = _wowRectangle.Height / 4;
+                _yPosMax = _yPosMin * 3;
+                Console.Out.WriteLine("Using default area");
             }
             else
             {
-                xPosMin = Properties.Settings.Default.minScanXY.X;
-                yPosMin = Properties.Settings.Default.minScanXY.Y;
-                xPosMax = Properties.Settings.Default.maxScanXY.X;
-                yPosMax = Properties.Settings.Default.maxScanXY.Y;
-                System.Console.Out.WriteLine("Using custom area");
+                _xPosMin = Settings.Default.minScanXY.X;
+                _yPosMin = Settings.Default.minScanXY.Y;
+                _xPosMax = Settings.Default.maxScanXY.X;
+                _yPosMax = Settings.Default.maxScanXY.Y;
+                Console.Out.WriteLine("Using custom area");
             }
-            System.Console.Out.WriteLine("Scanning area: " + xPosMin.ToString() + " , " + yPosMin.ToString() + " , " + xPosMax.ToString() + " , " + yPosMax.ToString() + " , ");
+            Console.Out.WriteLine("Scanning area: " + _xPosMin + " , " + _yPosMin + " , " + _xPosMax + " , " + _yPosMax + " , ");
             try
             {
-                if (Properties.Settings.Default.AlternativeRoute)
+                if (Settings.Default.AlternativeRoute)
                     await LookForBobberSpiralImpl(cancellationToken);
                 else
                     await LookForBobberImpl(cancellationToken);
@@ -59,18 +60,17 @@ namespace UltimateFishBot.Classes.BodyParts
 
         private async Task LookForBobberImpl(CancellationToken cancellationToken)
         {
+            int xposstep = (_xPosMax - _xPosMin) / Settings.Default.ScanningSteps;
+            int yposstep = (_yPosMax - _yPosMin) / Settings.Default.ScanningSteps;
+            int xoffset  = xposstep / Settings.Default.ScanningRetries;
 
-            int XPOSSTEP = (int)((xPosMax - xPosMin) / Properties.Settings.Default.ScanningSteps);
-            int YPOSSTEP = (int)((yPosMax - yPosMin) / Properties.Settings.Default.ScanningSteps);
-            int XOFFSET  = (int)(XPOSSTEP / Properties.Settings.Default.ScanningRetries);
-
-            if (Properties.Settings.Default.customScanArea)
+            if (Settings.Default.customScanArea)
             {
-                for (int tryCount = 0; tryCount < Properties.Settings.Default.ScanningRetries; ++tryCount)
+                for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; tryCount++)
                 {
-                    for (int x = (int)(xPosMin + (XOFFSET * tryCount)); x < xPosMax; x += XPOSSTEP)
+                    for (int x = _xPosMin + (xoffset * tryCount); x < _xPosMax; x += xposstep)
                     {
-                        for (int y = yPosMin; y < yPosMax; y += YPOSSTEP)
+                        for (int y = _yPosMin; y < _yPosMax; y += yposstep)
                         {
                             if (await MoveMouseAndCheckCursor(x, y, cancellationToken))
                                 return;
@@ -80,38 +80,38 @@ namespace UltimateFishBot.Classes.BodyParts
             }
             else
             {
-                for (int tryCount = 0; tryCount < Properties.Settings.Default.ScanningRetries; ++tryCount)
+                for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; ++tryCount)
                 {
-                    for (int x = (int)(xPosMin + (XOFFSET * tryCount)); x < xPosMax; x += XPOSSTEP)
+                    for (int x = _xPosMin + (xoffset * tryCount); x < _xPosMax; x += xposstep)
                     {
-                        for (int y = yPosMin; y < yPosMax; y += YPOSSTEP)
+                        for (int y = _yPosMin; y < _yPosMax; y += yposstep)
                         {
-                            if (await MoveMouseAndCheckCursor(wowRectangle.X + x, wowRectangle.Y + y, cancellationToken))
+                            if (await MoveMouseAndCheckCursor(_wowRectangle.X + x, _wowRectangle.Y + y, cancellationToken))
                                 return;
                         }
                     }
                 }
             }
 
-            throw new NoFishFoundException(); // Will be catch in Manager:EyeProcess_RunWorkerCompleted
+            throw new NoFishFoundException();
         }
 
         private async Task LookForBobberSpiralImpl(CancellationToken cancellationToken)
         {
 
-            int XPOSSTEP = (int)((xPosMax - xPosMin) / Properties.Settings.Default.ScanningSteps);
-            int YPOSSTEP = (int)((yPosMax - yPosMin) / Properties.Settings.Default.ScanningSteps);
-            int XOFFSET  = (int)(XPOSSTEP / Properties.Settings.Default.ScanningRetries);
-            int YOFFSET  = (int)(YPOSSTEP / Properties.Settings.Default.ScanningRetries);
+            int xposstep = (_xPosMax - _xPosMin) / Settings.Default.ScanningSteps;
+            int yposstep = (_yPosMax - _yPosMin) / Settings.Default.ScanningSteps;
+            int xoffset  = xposstep / Settings.Default.ScanningRetries;
+            int yoffset  = yposstep / Settings.Default.ScanningRetries;
 
-            if (Properties.Settings.Default.customScanArea)
+            if (Settings.Default.customScanArea)
             {
-                for (int tryCount = 0; tryCount < Properties.Settings.Default.ScanningRetries; ++tryCount)
+                for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; tryCount++)
                 {
-                    int x = (int)((xPosMin + xPosMax) / 2) + XOFFSET * tryCount;
-                    int y = (int)((yPosMin + yPosMax) / 2) + YOFFSET * tryCount;
+                    int x = (_xPosMin + _xPosMax) / 2 + xoffset * tryCount;
+                    int y = (_yPosMin + _yPosMax) / 2 + yoffset * tryCount;
 
-                    for (int i = 0; i <= 2 * Properties.Settings.Default.ScanningSteps; i++)
+                    for (int i = 0; i <= 2 * Settings.Default.ScanningSteps; i++)
                     {
                         for (int j = 0; j <= (i / 2); j++)
                         {
@@ -121,12 +121,12 @@ namespace UltimateFishBot.Classes.BodyParts
                             {
                                 if ((i / 2) % 2 == 0)
                                 {
-                                    dx = XPOSSTEP;
+                                    dx = xposstep;
                                     dy = 0;
                                 }
                                 else
                                 {
-                                    dx = -XPOSSTEP;
+                                    dx = -xposstep;
                                     dy = 0;
                                 }
                             }
@@ -135,12 +135,12 @@ namespace UltimateFishBot.Classes.BodyParts
                                 if ((i / 2) % 2 == 0)
                                 {
                                     dx = 0;
-                                    dy = YPOSSTEP;
+                                    dy = yposstep;
                                 }
                                 else
                                 {
                                     dx = 0;
-                                    dy = -YPOSSTEP;
+                                    dy = -yposstep;
                                 }
                             }
 
@@ -155,12 +155,12 @@ namespace UltimateFishBot.Classes.BodyParts
             }
             else
             {
-                for (int tryCount = 0; tryCount < Properties.Settings.Default.ScanningRetries; ++tryCount)
+                for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; ++tryCount)
                 {
-                    int x = (int)((xPosMin + xPosMax) / 2) + XOFFSET * tryCount;
-                    int y = (int)((yPosMin + yPosMax) / 2) + YOFFSET * tryCount;
+                    int x = (_xPosMin + _xPosMax) / 2 + xoffset * tryCount;
+                    int y = (_yPosMin + _yPosMax) / 2 + yoffset * tryCount;
 
-                    for (int i = 0; i <= 2 * Properties.Settings.Default.ScanningSteps; i++)
+                    for (int i = 0; i <= 2 * Settings.Default.ScanningSteps; i++)
                     {
                         for (int j = 0; j <= (i / 2); j++)
                         {
@@ -170,12 +170,12 @@ namespace UltimateFishBot.Classes.BodyParts
                             {
                                 if ((i / 2) % 2 == 0)
                                 {
-                                    dx = XPOSSTEP;
+                                    dx = xposstep;
                                     dy = 0;
                                 }
                                 else
                                 {
-                                    dx = -XPOSSTEP;
+                                    dx = -xposstep;
                                     dy = 0;
                                 }
                             }
@@ -184,26 +184,26 @@ namespace UltimateFishBot.Classes.BodyParts
                                 if ((i / 2) % 2 == 0)
                                 {
                                     dx = 0;
-                                    dy = YPOSSTEP;
+                                    dy = yposstep;
                                 }
                                 else
                                 {
                                     dx = 0;
-                                    dy = -YPOSSTEP;
+                                    dy = -yposstep;
                                 }
                             }
 
                             x += dx;
                             y += dy;
 
-                            if (await MoveMouseAndCheckCursor(wowRectangle.X + x, wowRectangle.Y + y, cancellationToken))
+                            if (await MoveMouseAndCheckCursor(_wowRectangle.X + x, _wowRectangle.Y + y, cancellationToken))
                                 return;
                         }
                     }
                 }
             }
 
-            throw new NoFishFoundException(); // Will be catch in Manager:EyeProcess_RunWorkerCompleted
+            throw new NoFishFoundException();
         }
 
         private async Task<bool> MoveMouseAndCheckCursor(int x, int y, CancellationToken cancellationToken)
@@ -214,17 +214,16 @@ namespace UltimateFishBot.Classes.BodyParts
             Win32.MoveMouse(x, y);
 
             // Pause (give the OS a chance to change the cursor)
-            await Task.Delay(Properties.Settings.Default.ScanningDelay, cancellationToken);
+            await Task.Delay(Settings.Default.ScanningDelay, cancellationToken);
 
             Win32.CursorInfo actualCursor = Win32.GetCurrentCursor();
 
-            if (actualCursor.flags == m_noFishCursor.flags &&
-                actualCursor.hCursor == m_noFishCursor.hCursor)
+            if (actualCursor.flags == _mNoFishCursor.flags &&
+                actualCursor.hCursor == _mNoFishCursor.hCursor)
                 return false;
 
             // Compare the actual icon with our fishIcon if user want it
-            if (Properties.Settings.Default.CheckCursor)
-                if (!ImageCompare(Win32.GetCursorIcon(actualCursor), Properties.Resources.fishIcon35x35))
+            if (Settings.Default.CheckCursor && !ImageCompare(Win32.GetCursorIcon(actualCursor), Resources.fishIcon35x35))
                     return false;
 
             // We found a fish !

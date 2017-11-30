@@ -1,26 +1,23 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using UltimateFishBot.Classes.Helpers;
 
 namespace UltimateFishBot.Classes.BodyParts
 {
-    class Hands
+    public class Hands
     {
-        private Cursor m_cursor;
-        private int m_baitIndex;
-        private string[] m_baitKeys;
+        private int _baitIndex;
+        private string[] _baitKeys;
 
         public Hands()
         {
-            m_baitIndex = 0;
-            m_cursor    = new Cursor(Cursor.Current.Handle);
+            _baitIndex = 0;
             UpdateKeys();
         }
 
         public void UpdateKeys()
         {
-            m_baitKeys = new string[7]
+            _baitKeys = new string[7]
             {
                 Properties.Settings.Default.BaitKey1,
                 Properties.Settings.Default.BaitKey2,
@@ -47,13 +44,13 @@ namespace UltimateFishBot.Classes.BodyParts
 
         public void ResetBaitIndex()
         {
-            m_baitIndex = 0;
+            _baitIndex = 0;
         }
 
         public async Task DoAction(Manager.NeededAction action, Mouth mouth, CancellationToken cancellationToken)
         {
-            string actionKey = "";
-            int sleepTime = 0;
+            string actionKey;
+            int sleepTime;
 
             switch (action)
             {
@@ -91,13 +88,13 @@ namespace UltimateFishBot.Classes.BodyParts
 
                         if (Properties.Settings.Default.CycleThroughBaitList)
                         {
-                            if (m_baitIndex >= 6)
-                                m_baitIndex = 0;
+                            if (_baitIndex >= 6)
+                                _baitIndex = 0;
 
-                            baitIndex = m_baitIndex++;
+                            baitIndex = _baitIndex++;
                         }
 
-                        actionKey = m_baitKeys[baitIndex];
+                        actionKey = _baitKeys[baitIndex];
                         mouth.Say(Translate.GetTranslate("manager", "LABEL_APPLY_BAIT", baitIndex));
                         sleepTime = 3;
                         break;

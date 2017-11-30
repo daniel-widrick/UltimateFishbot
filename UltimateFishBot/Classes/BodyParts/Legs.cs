@@ -1,43 +1,42 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using UltimateFishBot.Classes.Helpers;
+using UltimateFishBot.Properties;
 
 namespace UltimateFishBot.Classes.BodyParts
 {
-    class Legs
+    public class Legs
     {
         public enum Path
         {
-            FRONT_BACK = 0,
-            LEFT_RIGHT = 1,
-            JUMP       = 2
+            FrontBack = 0,
+            LeftRight = 1,
+            Jump      = 2
         }
 
-        public async Task DoMovement(T2S t2s, CancellationToken cancellationToken)
+        public async Task DoMovement(TextToSpeech textToSpeech, CancellationToken cancellationToken)
         {
-            switch ((Path)Properties.Settings.Default.AntiAfkMoves)
+            switch ((Path)Settings.Default.AntiAfkMoves)
             {
-                case Path.FRONT_BACK:
-                    await MovePath(new Keys[] { Keys.Up, Keys.Down }, cancellationToken);
+                case Path.FrontBack:
+                    await MovePath(new[] { Keys.Up, Keys.Down }, cancellationToken);
                     break;
-                case Path.LEFT_RIGHT:
-                    await MovePath(new Keys[] { Keys.Left, Keys.Right }, cancellationToken);
-                    break;
-                case Path.JUMP:
-                    await MovePath(new Keys[] { Keys.Space }, cancellationToken);
+                case Path.Jump:
+                    await MovePath(new[] { Keys.Space }, cancellationToken);
                     break;
                 default:
-                    await MovePath(new Keys[] { Keys.Left, Keys.Right }, cancellationToken);
+                    await MovePath(new[] { Keys.Left, Keys.Right }, cancellationToken);
                     break;
             }
-            if (t2s != null)
-                t2s.Say("Anti A F K");
+
+            textToSpeech?.Say("Anti A F K");
         }
 
-        private async Task MovePath(Keys[] moves, CancellationToken cancellationToken)
+        private async Task MovePath(IEnumerable<Keys> moves, CancellationToken cancellationToken)
         {
-            foreach (Keys move in moves)
+            foreach (var move in moves)
             {
                 await SingleMove(move, cancellationToken);
                 await Task.Delay(250, cancellationToken);
@@ -46,9 +45,9 @@ namespace UltimateFishBot.Classes.BodyParts
 
         private async Task SingleMove(Keys move, CancellationToken cancellationToken)
         {
-            Win32.SendKeyboardAction(move, Win32.keyState.KEYDOWN);
+            Win32.SendKeyboardAction(move, Win32.KeyState.Keydown);
             await Task.Delay(250, cancellationToken);
-            Win32.SendKeyboardAction(move, Win32.keyState.KEYUP);
+            Win32.SendKeyboardAction(move, Win32.KeyState.Keyup);
         }
     }
 }

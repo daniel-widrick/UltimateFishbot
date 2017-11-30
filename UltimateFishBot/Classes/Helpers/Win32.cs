@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace UltimateFishBot.Classes.Helpers
 {
-    class Win32
+    public class Win32
     {
         private struct Rect
         {
@@ -34,11 +34,11 @@ namespace UltimateFishBot.Classes.Helpers
             public Point ptScreenPos;
         }
 
-        public enum keyState
+        public enum KeyState
         {
-            KEYDOWN = 0,
-            EXTENDEDKEY = 1,
-            KEYUP = 2
+            Keydown = 0,
+            Extendedkey = 1,
+            Keyup = 2
         };
 
         [DllImport("user32.dll", EntryPoint = "FindWindow")]
@@ -51,42 +51,39 @@ namespace UltimateFishBot.Classes.Helpers
         private static extern bool GetWindowRect(IntPtr hwnd, ref Rect rectangle);
 
         [DllImport("user32.dll")]
-        private static extern bool SetCursorPos(int X, int Y);
+        private static extern bool SetCursorPos(int x, int y);
 
         [DllImport("user32.dll")]
         private static extern bool GetCursorInfo(out CursorInfo pci);
 
         [DllImport("user32.dll")]
-        private static extern bool DrawIcon(IntPtr hDC, int X, int Y, IntPtr hIcon);
+        private static extern bool DrawIcon(IntPtr hDc, int x, int y, IntPtr hIcon);
 
         [DllImport("user32.dll")]
         private static extern bool keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern bool SendNotifyMessage(IntPtr hWnd, uint Msg, UIntPtr wParam, IntPtr lParam);
+        private static extern bool SendNotifyMessage(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
         public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
 
         [DllImport("user32.dll")]
         public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-        private const uint WM_LBUTTONDOWN = 513;
-        private const uint WM_LBUTTONUP = 514;
-
-        private const uint WM_RBUTTONDOWN = 516;
-        private const uint WM_RBUTTONUP = 517;
+        
+        private const uint WmRbuttondown = 516;
+        private const uint WmRbuttonup = 517;
 
         public static Rectangle GetWowRectangle()
         {
-            IntPtr Wow = FindWindow("GxWindowClass", "World Of Warcraft");
-            Rect Win32ApiRect = new Rect();
-            GetWindowRect(Wow, ref Win32ApiRect);
+            IntPtr wow = FindWindow("GxWindowClass", "World Of Warcraft");
+            Rect win32ApiRect = new Rect();
+            GetWindowRect(wow, ref win32ApiRect);
             Rectangle myRect = new Rectangle();
-            myRect.X = Win32ApiRect.Left;
-            myRect.Y = Win32ApiRect.Top;
-            myRect.Width = (Win32ApiRect.Right - Win32ApiRect.Left);
-            myRect.Height = (Win32ApiRect.Bottom - Win32ApiRect.Top);
+            myRect.X = win32ApiRect.Left;
+            myRect.Y = win32ApiRect.Top;
+            myRect.Width = win32ApiRect.Right - win32ApiRect.Left;
+            myRect.Height = win32ApiRect.Bottom - win32ApiRect.Top;
             return myRect;
         }
 
@@ -106,19 +103,19 @@ namespace UltimateFishBot.Classes.Helpers
             return actualCursorIcon;
         }
 
-        static public void ActivateWow()
+        public static void ActivateWow()
         {
             ActivateApp(Properties.Settings.Default.ProcName);
             ActivateApp(Properties.Settings.Default.ProcName + "-64");
             ActivateApp("World Of Warcraft");
         }
 
-        static public void ActivateApp(string processName)
+        public static void ActivateApp(string processName)
         {
             Process[] p = Process.GetProcessesByName(processName);
 
             // Activate the first application we find with this name
-            if (p.Count() > 0)
+            if (p.Any())
                 SetForegroundWindow(p[0].MainWindowHandle);
         }
 
@@ -126,17 +123,17 @@ namespace UltimateFishBot.Classes.Helpers
         {
             if (SetCursorPos(x, y))
             {
-                LastX = x;
-                LastY = y;
+                _lastX = x;
+                _lastY = y;
             }
         }
 
         public static CursorInfo GetNoFishCursor()
         {
-            Rectangle WoWRect = Win32.GetWowRectangle();
-            Win32.MoveMouse((WoWRect.X + 10), (WoWRect.Y + 45));
-            LastRectX = WoWRect.X;
-            LastRectY = WoWRect.Y;
+            Rectangle woWRect = Win32.GetWowRectangle();
+            Win32.MoveMouse(woWRect.X + 10, woWRect.Y + 45);
+            _lastRectX = woWRect.X;
+            _lastRectY = woWRect.Y;
             Thread.Sleep(15);
             CursorInfo myInfo = new CursorInfo();
             myInfo.cbSize = Marshal.SizeOf(myInfo);
@@ -167,39 +164,39 @@ namespace UltimateFishBot.Classes.Helpers
 
         public static void SendMouseClick()
         {
-            IntPtr Wow = FindWindow("GxWindowClass", "World Of Warcraft");
-            long dWord = MakeDWord((LastX - LastRectX), (LastY - LastRectY));
+            IntPtr wow = FindWindow("GxWindowClass", "World Of Warcraft");
+            long dWord = MakeDWord(_lastX - _lastRectX, _lastY - _lastRectY);
 
             if (Properties.Settings.Default.ShiftLoot)
-                SendKeyboardAction(16, keyState.KEYDOWN);
+                SendKeyboardAction(16, KeyState.Keydown);
 
-            SendNotifyMessage(Wow, WM_RBUTTONDOWN, (UIntPtr)1, (IntPtr)dWord);
+            SendNotifyMessage(wow, WmRbuttondown, (UIntPtr)1, (IntPtr)dWord);
             Thread.Sleep(100);
-            SendNotifyMessage(Wow, WM_RBUTTONUP, (UIntPtr)1, (IntPtr)dWord);
+            SendNotifyMessage(wow, WmRbuttonup, (UIntPtr)1, (IntPtr)dWord);
 
             if (Properties.Settings.Default.ShiftLoot)
-                SendKeyboardAction(16, keyState.KEYUP);
+                SendKeyboardAction(16, KeyState.Keyup);
         }
 
-        public static bool SendKeyboardAction(Keys key, keyState state)
+        public static bool SendKeyboardAction(Keys key, KeyState state)
         {
             return SendKeyboardAction((byte)key.GetHashCode(), state);
         }
 
-        public static bool SendKeyboardAction(byte key, keyState state)
+        public static bool SendKeyboardAction(byte key, KeyState state)
         {
             return keybd_event(key, 0, (uint)state, (UIntPtr)0);
         }
 
-        private static long MakeDWord(int LoWord, int HiWord)
+        private static long MakeDWord(int loWord, int hiWord)
         {
-            return (HiWord << 16) | (LoWord & 0xFFFF);
+            return (hiWord << 16) | (loWord & 0xFFFF);
         }
 
-        static private int LastRectX;
-        static private int LastRectY;
+        private static int _lastRectX;
+        private static int _lastRectY;
 
-        static private int LastX;
-        static private int LastY;
+        private static int _lastX;
+        private static int _lastY;
     }
 }

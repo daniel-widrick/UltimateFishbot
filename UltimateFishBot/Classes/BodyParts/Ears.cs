@@ -13,10 +13,16 @@ namespace UltimateFishBot.Classes.BodyParts
         private MMDevice _sndDevice;
         private readonly Queue<int> _volumeQueue = new Queue<int>();
         private const int Tickrate = 100; // ms pause between sound checks
+        private readonly IAsyncEars _asyncEars = AsyncEars.Instance;
 
         private const int MaxVolumeQueueLength = 5;
-        
+
         public async Task<bool> Listen(int millisecondsToListen, CancellationToken cancellationToken)
+        {
+            return await _asyncEars.ListenForFish(TimeSpan.FromMilliseconds(millisecondsToListen), cancellationToken);
+        }
+
+        public async Task<bool> ListenX(int millisecondsToListen, CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -24,22 +30,24 @@ namespace UltimateFishBot.Classes.BodyParts
             _sndDevice = Properties.Settings.Default.AudioDevice != ""
                 ? sndDevEnum.GetDevice(Properties.Settings.Default.AudioDevice)
                 : sndDevEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
-
-            Func<bool> heardFish;
-            if (Properties.Settings.Default.AverageSound)
-                heardFish = ListenTimerTickAvg;
-            else
-                heardFish = ListenTimerTick;
-
+            
             while (stopwatch.ElapsedMilliseconds <= millisecondsToListen)
             {
                 await Task.Delay(Tickrate, cancellationToken);
-                if (heardFish())
+                if (HaveHeardFish())
                 {
                     return true;
                 }
             }
+
             return false;
+        }
+
+        private bool HaveHeardFish()
+        {
+            return Properties.Settings.Default.AverageSound
+                ? ListenTimerTickAvg()
+                : ListenTimerTick();
         }
 
         private bool ListenTimerTick()

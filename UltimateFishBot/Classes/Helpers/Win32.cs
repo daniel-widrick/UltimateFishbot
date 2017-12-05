@@ -76,7 +76,7 @@ namespace UltimateFishBot.Classes.Helpers
 
         public static Rectangle GetWowRectangle()
         {
-            IntPtr wow = FindWindow("GxWindowClass", "World Of Warcraft");
+            IntPtr wow = FindWindow("GxWindowClassD3d", "World Of Warcraft");
             Rect win32ApiRect = new Rect();
             GetWindowRect(wow, ref win32ApiRect);
             Rectangle myRect = new Rectangle();
@@ -164,7 +164,7 @@ namespace UltimateFishBot.Classes.Helpers
 
         public static void SendMouseClick()
         {
-            IntPtr wow = FindWindow("GxWindowClass", "World Of Warcraft");
+            IntPtr wow = FindWindow("GxWindowClassD3d", "World Of Warcraft");
             long dWord = MakeDWord(_lastX - _lastRectX, _lastY - _lastRectY);
 
             if (Properties.Settings.Default.ShiftLoot)

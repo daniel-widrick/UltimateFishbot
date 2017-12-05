@@ -1,6 +1,6 @@
 ﻿namespace UltimateFishBot.Forms
 {
-    partial class frmSettings
+    partial class FrmSettings
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSettings));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmSettings));
             this.LabelScanningDelayDesc = new System.Windows.Forms.Label();
             this.txtScanSteps = new System.Windows.Forms.TextBox();
             this.LabelScanningStepsDesc = new System.Windows.Forms.Label();

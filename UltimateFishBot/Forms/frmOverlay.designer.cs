@@ -2,7 +2,7 @@ using System.Windows.Forms;
 
 namespace UltimateFishBot.Forms
 {
-    partial class frmOverlay
+    partial class FrmOverlay
     {
         /// <summary>
         /// Required designer variable.
@@ -19,7 +19,7 @@ namespace UltimateFishBot.Forms
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmOverlay));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmOverlay));
             this.clickTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 

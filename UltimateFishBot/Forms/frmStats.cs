@@ -4,17 +4,17 @@ using UltimateFishBot.Classes;
 
 namespace UltimateFishBot.Forms
 {
-    public partial class frmStats : Form
+    public partial class FrmStats : Form
     {
-        private static frmStats inst;
-        public static frmStats GetForm(Manager manag)
+        private static FrmStats inst;
+        public static FrmStats GetForm(Manager manag)
         {
             if (inst == null || inst.IsDisposed)
-                inst = new frmStats(manag);
+                inst = new FrmStats(manag);
             return inst;
         }
 
-        public frmStats(Manager manager)
+        public FrmStats(Manager manager)
         {
             InitializeComponent();
 

@@ -1,6 +1,6 @@
 ﻿namespace UltimateFishBot.Forms
 {
-    partial class frmStats
+    partial class FrmStats
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmStats));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmStats));
             this.labelSuccess = new System.Windows.Forms.Label();
             this.labelNotFoundCount = new System.Windows.Forms.Label();
             this.labelNotFound = new System.Windows.Forms.Label();

@@ -88,17 +88,17 @@ namespace UltimateFishBot
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            frmSettings.GetForm(this).Show();
+            FrmSettings.GetForm(this).Show();
         }
 
         private void btnStatistics_Click(object sender, EventArgs e)
         {
-            frmStats.GetForm(m_manager).Show();
+            FrmStats.GetForm(m_manager).Show();
         }
 
         private void btnHowTo_Click(object sender, EventArgs e)
         {
-            frmDirections.GetForm.Show();
+            FrmDirections.GetForm.Show();
         }
 
         private void btnClose_Click(object sender, EventArgs e)

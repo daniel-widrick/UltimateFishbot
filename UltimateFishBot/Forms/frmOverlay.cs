@@ -7,14 +7,14 @@ namespace UltimateFishBot.Forms
 {
 
 
-    public partial class frmOverlay : Form
+    public partial class FrmOverlay : Form
     {
         #region:::::::::::::::::::::::::::::::::::::::::::Create Singleton:::::::::::::::::::::::::::::::::::::::::::
-        private static frmOverlay inst;
-        public static frmOverlay GetForm(frmSettings settings)
+        private static FrmOverlay inst;
+        public static FrmOverlay GetForm(FrmSettings settings)
         {
             if (inst == null || inst.IsDisposed)
-                inst = new frmOverlay(settings);
+                inst = new FrmOverlay(settings);
             return inst;
         }
         #endregion
@@ -54,7 +54,7 @@ namespace UltimateFishBot.Forms
 
         }
 
-        private frmSettings settings;
+        private FrmSettings settings;
         public ClickAction CurrentAction;
         public bool LeftButtonDown = false;
         public bool RectangleDrawn = false;
@@ -91,7 +91,7 @@ namespace UltimateFishBot.Forms
         #endregion
 
         #region:::::::::::::::::::::::::::::::::::::::::::Mouse Event Handlers & Drawing Initialization:::::::::::::::::::::::::::::::::::::::::::
-        public frmOverlay(frmSettings settings)
+        public FrmOverlay(FrmSettings settings)
         {
 
             InitializeComponent();

@@ -272,6 +272,7 @@ namespace UltimateFishBot.Classes
             var uiUpdateCancelTokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             var uiUpdateCancelToken = uiUpdateCancelTokenSource.Token;
+
             var progress = new Progress<long>(msecs =>
             {
                 if (!uiUpdateCancelToken.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
@@ -283,14 +284,11 @@ namespace UltimateFishBot.Classes
                         Properties.Settings.Default.FishWait / Second));
                 }
             });
-            var uiUpdateTask = Task.Run(
-                async () => await UpdateUiWhileWaitingToHearFish(progress, uiUpdateCancelToken),
-                uiUpdateCancelToken);
+            var uiUpdateTask = Task.Run(() => UpdateUiWhileWaitingToHearFish(progress, uiUpdateCancelToken), uiUpdateCancelToken);
 
-            bool fishHeard = await _mEars.Listen(
-                Properties.Settings.Default.FishWait,
-                cancellationToken);
+            bool fishHeard = await _mEars.Listen(Properties.Settings.Default.FishWait, cancellationToken);
             uiUpdateCancelTokenSource.Cancel();
+
             try
             {
                 uiUpdateTask.GetAwaiter().GetResult(); // Wait & Unwrap

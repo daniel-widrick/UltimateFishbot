@@ -8,13 +8,13 @@ using UltimateFishBot.Classes;
 
 namespace UltimateFishBot.Forms
 {
-    public partial class frmSettings : Form
+    public partial class FrmSettings : Form
     {
-        private static frmSettings inst;
-        public static frmSettings GetForm(frmMain main)
+        private static FrmSettings inst;
+        public static FrmSettings GetForm(frmMain main)
         {
             if (inst == null || inst.IsDisposed)
-                inst = new frmSettings(main);
+                inst = new FrmSettings(main);
             return inst;
         }
 
@@ -33,7 +33,7 @@ namespace UltimateFishBot.Forms
         private MMDevice m_SndDevice;
         private Keys m_hotkey;
 
-        public frmSettings(frmMain mainForm)
+        public FrmSettings(frmMain mainForm)
         {
             InitializeComponent();
             m_mainForm = mainForm;
@@ -437,7 +437,7 @@ namespace UltimateFishBot.Forms
         {
             if (MessageBox.Show(Translate.GetTranslate("frmSettings", "SCAN_MESSAGE"), Translate.GetTranslate("frmSettings", "SCAN_TITLE"), MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
-                frmOverlay.GetForm(this).Show();
+                FrmOverlay.GetForm(this).Show();
             }
         }
 

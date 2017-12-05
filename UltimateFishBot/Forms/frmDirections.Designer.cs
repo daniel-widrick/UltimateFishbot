@@ -1,6 +1,6 @@
 ﻿namespace UltimateFishBot.Forms
 {
-    partial class frmDirections
+    partial class FrmDirections
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmDirections));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmDirections));
             this.Button1 = new System.Windows.Forms.Button();
             this.Label3Desc = new System.Windows.Forms.Label();
             this.Label3Title = new System.Windows.Forms.Label();

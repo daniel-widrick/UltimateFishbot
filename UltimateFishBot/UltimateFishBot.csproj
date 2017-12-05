@@ -72,72 +72,74 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\BodyParts\AsyncEars.cs" />
     <Compile Include="Classes\BodyParts\Ears.cs" />
     <Compile Include="Classes\BodyParts\Eyes.cs" />
     <Compile Include="Classes\BodyParts\Hands.cs" />
     <Compile Include="Classes\BodyParts\Legs.cs" />
     <Compile Include="Classes\BodyParts\Mouth.cs" />
     <Compile Include="Classes\BodyParts\TextToSpeech.cs" />
+    <Compile Include="Classes\CircularQueue.cs" />
     <Compile Include="Classes\FishingStats.cs" />
     <Compile Include="Classes\Helpers\Win32.cs" />
     <Compile Include="Classes\Manager.cs" />
     <Compile Include="Classes\Translate.cs" />
-    <Compile Include="Forms\about.cs">
+    <Compile Include="Forms\About.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\about.Designer.cs">
-      <DependentUpon>about.cs</DependentUpon>
+    <Compile Include="Forms\About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\frmOverlay.cs">
+    <Compile Include="Forms\FrmOverlay.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\frmOverlay.designer.cs">
-      <DependentUpon>frmOverlay.cs</DependentUpon>
+    <Compile Include="Forms\FrmOverlay.designer.cs">
+      <DependentUpon>FrmOverlay.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\frmDirections.cs">
+    <Compile Include="Forms\FrmDirections.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\frmDirections.Designer.cs">
-      <DependentUpon>frmDirections.cs</DependentUpon>
+    <Compile Include="Forms\FrmDirections.Designer.cs">
+      <DependentUpon>FrmDirections.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\frmMain.cs">
+    <Compile Include="Forms\FrmMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\frmMain.Designer.cs">
-      <DependentUpon>frmMain.cs</DependentUpon>
+    <Compile Include="Forms\FrmMain.Designer.cs">
+      <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\frmSettings.cs">
+    <Compile Include="Forms\FrmSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\frmSettings.Designer.cs">
-      <DependentUpon>frmSettings.cs</DependentUpon>
+    <Compile Include="Forms\FrmSettings.Designer.cs">
+      <DependentUpon>FrmSettings.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\frmStats.cs">
+    <Compile Include="Forms\FrmStats.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\frmStats.Designer.cs">
-      <DependentUpon>frmStats.cs</DependentUpon>
+    <Compile Include="Forms\FrmStats.Designer.cs">
+      <DependentUpon>FrmStats.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Forms\about.resx">
-      <DependentUpon>about.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\About.resx">
+      <DependentUpon>About.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\frmDirections.resx">
-      <DependentUpon>frmDirections.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\FrmDirections.resx">
+      <DependentUpon>FrmDirections.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\frmMain.resx">
-      <DependentUpon>frmMain.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\FrmMain.resx">
+      <DependentUpon>FrmMain.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\frmOverlay.resx">
-      <DependentUpon>frmOverlay.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\FrmOverlay.resx">
+      <DependentUpon>FrmOverlay.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\frmSettings.resx">
-      <DependentUpon>frmSettings.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\FrmSettings.resx">
+      <DependentUpon>FrmSettings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\frmStats.resx">
-      <DependentUpon>frmStats.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\FrmStats.resx">
+      <DependentUpon>FrmStats.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

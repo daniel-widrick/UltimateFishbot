@@ -7,7 +7,9 @@ using UltimateFishBot.Properties;
 
 namespace UltimateFishBot.Classes.BodyParts
 {
-    public class NoFishFoundException : Exception { }
+    public class NoFishFoundException : Exception
+    {
+    }
 
     public class Eyes
     {
@@ -39,9 +41,11 @@ namespace UltimateFishBot.Classes.BodyParts
                 _yPosMax = Settings.Default.maxScanXY.Y;
                 Console.Out.WriteLine("Using custom area");
             }
-            Console.Out.WriteLine("Scanning area: " + _xPosMin + " , " + _yPosMin + " , " + _xPosMax + " , " + _yPosMax + " , ");
+            Console.Out.WriteLine("Scanning area: " + _xPosMin + " , " + _yPosMin + " , " + _xPosMax + " , " +
+                                  _yPosMax + " , ");
             try
             {
+
                 if (Settings.Default.AlternativeRoute)
                     await LookForBobberSpiralImpl(cancellationToken);
                 else
@@ -62,35 +66,58 @@ namespace UltimateFishBot.Classes.BodyParts
         {
             int xposstep = (_xPosMax - _xPosMin) / Settings.Default.ScanningSteps;
             int yposstep = (_yPosMax - _yPosMin) / Settings.Default.ScanningSteps;
-            int xoffset  = xposstep / Settings.Default.ScanningRetries;
+            int xoffset = xposstep / Settings.Default.ScanningRetries;
 
-            if (Settings.Default.customScanArea)
+            bool heardFish = false;
+
+            AsyncEars.Instance.HeardFish += HeardFish;
+
+            void HeardFish(object sender, EventArgs e)
             {
-                for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; tryCount++)
-                {
-                    for (int x = _xPosMin + (xoffset * tryCount); x < _xPosMax; x += xposstep)
-                    {
-                        for (int y = _yPosMin; y < _yPosMax; y += yposstep)
-                        {
-                            if (await MoveMouseAndCheckCursor(x, y, cancellationToken))
-                                return;
-                        }
-                    }
-                }
+                heardFish = true;
             }
-            else
+
+            AsyncEars.Instance.StartListening();
+
+            try
             {
                 for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; ++tryCount)
                 {
-                    for (int x = _xPosMin + (xoffset * tryCount); x < _xPosMax; x += xposstep)
+                    if (Settings.Default.customScanArea)
                     {
-                        for (int y = _yPosMin; y < _yPosMax; y += yposstep)
+                        for (int x = _xPosMin + (xoffset * tryCount); x < _xPosMax; x += xposstep)
                         {
-                            if (await MoveMouseAndCheckCursor(_wowRectangle.X + x, _wowRectangle.Y + y, cancellationToken))
-                                return;
+                            for (int y = _yPosMin; y < _yPosMax; y += yposstep)
+                            {
+                                if (heardFish) // Abort looking if the fish splashes before the bobber is found
+                                    throw new NoFishFoundException();
+
+                                if (await MoveMouseAndCheckCursor(x, y, cancellationToken))
+                                    return;
+                            }
                         }
                     }
+                    else
+                    {
+                        for (int x = _xPosMin + (xoffset * tryCount); x < _xPosMax; x += xposstep)
+                        {
+                            for (int y = _yPosMin; y < _yPosMax; y += yposstep)
+                            {
+                                if (heardFish) // Abort looking if the fish splashes before the bobber is found
+                                    throw new NoFishFoundException();
+
+                                if (await MoveMouseAndCheckCursor(_wowRectangle.X + x, _wowRectangle.Y + y,
+                                    cancellationToken))
+                                    return;
+                            }
+                        }
+
+                    }
                 }
+            }
+            finally
+            {
+                AsyncEars.Instance.HeardFish -= HeardFish;
             }
 
             throw new NoFishFoundException();
@@ -101,106 +128,131 @@ namespace UltimateFishBot.Classes.BodyParts
 
             int xposstep = (_xPosMax - _xPosMin) / Settings.Default.ScanningSteps;
             int yposstep = (_yPosMax - _yPosMin) / Settings.Default.ScanningSteps;
-            int xoffset  = xposstep / Settings.Default.ScanningRetries;
-            int yoffset  = yposstep / Settings.Default.ScanningRetries;
+            int xoffset = xposstep / Settings.Default.ScanningRetries;
+            int yoffset = yposstep / Settings.Default.ScanningRetries;
 
-            if (Settings.Default.customScanArea)
+            bool heardFish = false;
+
+            AsyncEars.Instance.HeardFish += HeardFish;
+
+            void HeardFish(object sender, EventArgs e)
             {
-                for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; tryCount++)
+                heardFish = true;
+            }
+
+            AsyncEars.Instance.StartListening();
+
+            try
+            {
+                if (Settings.Default.customScanArea)
                 {
-                    int x = (_xPosMin + _xPosMax) / 2 + xoffset * tryCount;
-                    int y = (_yPosMin + _yPosMax) / 2 + yoffset * tryCount;
-
-                    for (int i = 0; i <= 2 * Settings.Default.ScanningSteps; i++)
+                    for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; tryCount++)
                     {
-                        for (int j = 0; j <= (i / 2); j++)
+                        int x = (_xPosMin + _xPosMax) / 2 + xoffset * tryCount;
+                        int y = (_yPosMin + _yPosMax) / 2 + yoffset * tryCount;
+
+                        for (int i = 0; i <= 2 * Settings.Default.ScanningSteps; i++)
                         {
-                            int dx = 0, dy = 0;
-
-                            if (i % 2 == 0)
+                            for (int j = 0; j <= (i / 2); j++)
                             {
-                                if ((i / 2) % 2 == 0)
+                                int dx = 0, dy = 0;
+
+                                if (i % 2 == 0)
                                 {
-                                    dx = xposstep;
-                                    dy = 0;
+                                    if ((i / 2) % 2 == 0)
+                                    {
+                                        dx = xposstep;
+                                        dy = 0;
+                                    }
+                                    else
+                                    {
+                                        dx = -xposstep;
+                                        dy = 0;
+                                    }
                                 }
                                 else
                                 {
-                                    dx = -xposstep;
-                                    dy = 0;
+                                    if ((i / 2) % 2 == 0)
+                                    {
+                                        dx = 0;
+                                        dy = yposstep;
+                                    }
+                                    else
+                                    {
+                                        dx = 0;
+                                        dy = -yposstep;
+                                    }
                                 }
+
+                                x += dx;
+                                y += dy;
+
+                                if (heardFish) // Abort looking if the fish splashes before the bobber is found
+                                    throw new NoFishFoundException();
+
+                                if (await MoveMouseAndCheckCursor(x, y, cancellationToken))
+                                    return;
                             }
-                            else
+                        }
+                    }
+                }
+                else
+                {
+                    for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; ++tryCount)
+                    {
+                        int x = (_xPosMin + _xPosMax) / 2 + xoffset * tryCount;
+                        int y = (_yPosMin + _yPosMax) / 2 + yoffset * tryCount;
+
+                        for (int i = 0; i <= 2 * Settings.Default.ScanningSteps; i++)
+                        {
+                            for (int j = 0; j <= (i / 2); j++)
                             {
-                                if ((i / 2) % 2 == 0)
+                                int dx = 0, dy = 0;
+
+                                if (i % 2 == 0)
                                 {
-                                    dx = 0;
-                                    dy = yposstep;
+                                    if ((i / 2) % 2 == 0)
+                                    {
+                                        dx = xposstep;
+                                        dy = 0;
+                                    }
+                                    else
+                                    {
+                                        dx = -xposstep;
+                                        dy = 0;
+                                    }
                                 }
                                 else
                                 {
-                                    dx = 0;
-                                    dy = -yposstep;
+                                    if ((i / 2) % 2 == 0)
+                                    {
+                                        dx = 0;
+                                        dy = yposstep;
+                                    }
+                                    else
+                                    {
+                                        dx = 0;
+                                        dy = -yposstep;
+                                    }
                                 }
+
+                                x += dx;
+                                y += dy;
+
+                                if (heardFish) // Abort looking if the fish splashes before the bobber is found
+                                    throw new NoFishFoundException();
+
+                                if (await MoveMouseAndCheckCursor(_wowRectangle.X + x, _wowRectangle.Y + y,
+                                    cancellationToken))
+                                    return;
                             }
-
-                            x += dx;
-                            y += dy;
-
-                            if (await MoveMouseAndCheckCursor(x, y, cancellationToken))
-                                return;
                         }
                     }
                 }
             }
-            else
+            finally
             {
-                for (int tryCount = 0; tryCount < Settings.Default.ScanningRetries; ++tryCount)
-                {
-                    int x = (_xPosMin + _xPosMax) / 2 + xoffset * tryCount;
-                    int y = (_yPosMin + _yPosMax) / 2 + yoffset * tryCount;
-
-                    for (int i = 0; i <= 2 * Settings.Default.ScanningSteps; i++)
-                    {
-                        for (int j = 0; j <= (i / 2); j++)
-                        {
-                            int dx = 0, dy = 0;
-
-                            if (i % 2 == 0)
-                            {
-                                if ((i / 2) % 2 == 0)
-                                {
-                                    dx = xposstep;
-                                    dy = 0;
-                                }
-                                else
-                                {
-                                    dx = -xposstep;
-                                    dy = 0;
-                                }
-                            }
-                            else
-                            {
-                                if ((i / 2) % 2 == 0)
-                                {
-                                    dx = 0;
-                                    dy = yposstep;
-                                }
-                                else
-                                {
-                                    dx = 0;
-                                    dy = -yposstep;
-                                }
-                            }
-
-                            x += dx;
-                            y += dy;
-
-                            if (await MoveMouseAndCheckCursor(_wowRectangle.X + x, _wowRectangle.Y + y, cancellationToken))
-                                return;
-                        }
-                    }
-                }
+                AsyncEars.Instance.HeardFish -= HeardFish;
             }
 
             throw new NoFishFoundException();
@@ -223,10 +275,12 @@ namespace UltimateFishBot.Classes.BodyParts
                 return false;
 
             // Compare the actual icon with our fishIcon if user want it
-            if (Settings.Default.CheckCursor && !ImageCompare(Win32.GetCursorIcon(actualCursor), Resources.fishIcon35x35))
-                    return false;
+            if (Settings.Default.CheckCursor &&
+                !ImageCompare(Win32.GetCursorIcon(actualCursor), Resources.fishIcon35x35))
+                return false;
 
             // We found a fish !
+            await Task.Delay(300);
             return true;
         }
 

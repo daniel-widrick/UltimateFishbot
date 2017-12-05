@@ -4,20 +4,20 @@ using UltimateFishBot.Classes;
 
 namespace UltimateFishBot.Forms
 {
-    public partial class frmDirections : Form
+    public partial class FrmDirections : Form
     {
-        private static frmDirections inst;
-        public static frmDirections GetForm
+        private static FrmDirections inst;
+        public static FrmDirections GetForm
         {
             get
             {
                 if (inst == null || inst.IsDisposed)
-                    inst = new frmDirections();
+                    inst = new FrmDirections();
                 return inst;
             }
         }
 
-        public frmDirections()
+        public FrmDirections()
         {
             InitializeComponent();
         }

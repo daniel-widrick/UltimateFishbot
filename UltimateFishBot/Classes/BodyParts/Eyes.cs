@@ -17,6 +17,9 @@ namespace UltimateFishBot.Classes.BodyParts
         Rectangle wowRectangle;
         private Win32.CursorInfo m_noFishCursor;
 
+        public bool CheckBobber(CancellationToken cancellationToken)
+            => ImageCompare(Win32.GetCursorIcon(Win32.GetCurrentCursor()), Properties.Resources.fishIcon35x35);
+
         public async Task<bool> LookForBobber(CancellationToken cancellationToken)
         {
             m_noFishCursor = Win32.GetNoFishCursor();

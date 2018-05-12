@@ -262,12 +262,15 @@ namespace UltimateFishBot.Classes
             m_mouth.Say(Translate.GetTranslate("manager", "LABEL_CASTING"));
             await m_hands.Cast(cancellationToken);
 
-            m_mouth.Say(Translate.GetTranslate("manager", "LABEL_FINDING"));
-            bool didFindFish = await m_eyes.LookForBobber(cancellationToken);
-            if (!didFindFish)
+            if (!m_eyes.CheckBobber(cancellationToken))
             {
-                m_fishingStats.RecordBobberNotFound();
-                return;
+                m_mouth.Say(Translate.GetTranslate("manager", "LABEL_FINDING"));
+                bool didFindFish = await m_eyes.LookForBobber(cancellationToken);
+                if (!didFindFish)
+                {
+                    m_fishingStats.RecordBobberNotFound();
+                    return;
+                }
             }
 
             // Update UI with wait status            
